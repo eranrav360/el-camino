@@ -125,7 +125,7 @@ const days = [
     n: 2, title: "נסיעה ברכבת לוויגו", date: "8/9 - יום שלישי",
     notes: "רכבת ALSA/רנפה כ-3 שעות מפורטו. לילה בוויגו",
     color: "#d9822b",
-    stops: [{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"נקודת יציאה - מסלול החוף"}]
+    stops: [{name:"Porto (HF Tuela)", lat:41.1545741, lng:-8.6305493, note:"התחלה - יציאה ברכבת"},{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"נקודת יציאה - מסלול החוף"}]
   },
   {
     n: 3, title: "תחילת הקמינו - מסלול החוף", date: "9/9 - יום רביעי",
@@ -174,18 +174,47 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let dayLayers = []; // { layerGroup, bounds }
 let allBoundsPoints = [];
 
-days.forEach(day => {
+// Days walked on the Camino itself use foot routing; the bus/transit legs use driving routing.
+const drivingDays = new Set([2, 8]); // Porto->Vigo train and Santiago->Porto airport bus are not walked stages.
+// Note: there's no free public train-routing API, so these two legs are approximated using
+// road-network routing (closest publicly available corridor), not literal rail tracks.
+
+async function fetchRouteGeometry(latlngs, profile) {
+  // profile: 'foot' or 'car'. Uses OSM's public routing service (no API key needed).
+  const coords = latlngs.map(([lat, lng]) => `${lng},${lat}`).join(';');
+  const url = `https://routing.openstreetmap.de/routed-${profile}/route/v1/${profile === 'foot' ? 'foot' : 'driving'}/${coords}?overview=full&geometries=geojson`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('routing failed');
+    const data = await res.json();
+    if (!data.routes || !data.routes.length) throw new Error('no route');
+    // GeoJSON coords are [lng, lat] -> convert to [lat, lng] for Leaflet
+    return data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+  } catch (e) {
+    console.warn('Routing failed, falling back to straight line for', profile, e);
+    return latlngs; // fallback: straight line
+  }
+}
+
+async function buildDay(day) {
   const group = L.layerGroup();
   const latlngs = day.stops.map(s => [s.lat, s.lng]);
   latlngs.forEach(p => allBoundsPoints.push(p));
 
-  // route line
+  // route line — real path when there's more than one stop
   if (latlngs.length > 1) {
-    L.polyline(latlngs, { color: day.color, weight: 4, opacity: 0.85, dashArray: day.n <= 2 ? '2,8' : null }).addTo(group);
+    const profile = drivingDays.has(day.n) ? 'car' : 'foot';
+    const routedLine = await fetchRouteGeometry(latlngs, profile);
+    L.polyline(routedLine, {
+      color: day.color,
+      weight: 4,
+      opacity: 0.85,
+      dashArray: profile === 'car' ? '2,8' : null
+    }).addTo(group);
   }
 
   // markers
-  day.stops.forEach((s, idx) => {
+  day.stops.forEach((s) => {
     const marker = L.circleMarker([s.lat, s.lng], {
       radius: 8,
       fillColor: day.color,
@@ -198,12 +227,18 @@ days.forEach(day => {
 
   group.addTo(map);
   dayLayers.push({ day, group });
-});
+}
 
 function fitAll() {
   if (allBoundsPoints.length) map.fitBounds(allBoundsPoints, { padding: [40, 40] });
 }
-fitAll();
+
+(async () => {
+  for (const day of days) {
+    await buildDay(day);
+  }
+  fitAll();
+})();
 
 // Sidebar day list
 const dayListEl = document.getElementById('dayList');
