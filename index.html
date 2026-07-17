@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>קמינו פורטוגז - 50 יום הולדת 🥾</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --panel: #ffffff;
+    --ink: #2b2620;
+    --muted: #6b6358;
+    --accent: #c1502e;
+    --border: #e4ddd0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+  }
+  #app { display: flex; height: 100vh; }
+  #sidebar {
+    width: 340px;
+    min-width: 340px;
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  #map { flex: 1; }
+  h1 {
+    font-size: 20px;
+    margin: 0 0 4px;
+    color: var(--ink);
+  }
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 18px;
+  }
+  .controls {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .btn {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ink);
+  }
+  .btn:hover { background: #f1ece2; }
+  .btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .day-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: box-shadow .15s;
+  }
+  .day-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .day-card.selected { border-color: var(--accent); background: #fbf1ec; }
+  .day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    margin-left: 8px;
+  }
+  .day-title { font-weight: 600; font-size: 14px; }
+  .day-date { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .day-notes { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .legend {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+  }
+  .leaflet-popup-content { direction: rtl; font-size: 13px; }
+  @media (max-width: 720px) {
+    #app { flex-direction: column; }
+    #sidebar { width: 100%; min-width: 0; max-height: 42vh; border-left: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="sidebar">
+    <h1>קמינו פורטוגז 🥾</h1>
+    <div class="subtitle">מסלול יומולדת 50 · 8 ימים · פורטו → סנטיאגו דה קומפוסטלה</div>
+    <div class="controls">
+      <button class="btn active" id="btnAll">כל המסלול</button>
+      <button class="btn" id="btnFit">התמקד</button>
+    </div>
+    <div id="dayList"></div>
+    <div class="legend">💡 לחיצה על יום מסמנת אותו במפה בלבד. "כל המסלול" מציג את כל שמונת הימים יחד עם קו החיבור המלא.</div>
+  </div>
+  <div id="map"></div>
+</div>
+
+<script>
+const days = [
+  {
+    n: 1, title: "נחיתה בפורטו", date: "9/7 - יום שני",
+    notes: "לילה בפורטו - HF Tuela",
+    color: "#c1502e",
+    stops: [{name:"Porto (HF Tuela)", lat:41.1545741, lng:-8.6305493, note:"מקום הלינה"}]
+  },
+  {
+    n: 2, title: "נסיעה ברכבת לוויגו", date: "8/9 - יום שלישי",
+    notes: "רכבת ALSA/רנפה כ-3 שעות מפורטו. לילה בוויגו",
+    color: "#d9822b",
+    stops: [{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"נקודת יציאה - מסלול החוף"}]
+  },
+  {
+    n: 3, title: "תחילת הקמינו - מסלול החוף", date: "9/9 - יום רביעי",
+    notes: "הליכה של כ-15 ק\"מ לרדונדלה. לילה שם",
+    color: "#c9a227",
+    stops: [{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"התחלה"},{name:"Redondela", lat:42.2818519, lng:-8.6091703, note:"לינה"}]
+  },
+  {
+    n: 4, title: "לארקדה - סיום מסלול החוף", date: "10/9 - יום חמישי",
+    notes: "הליכה לארקדה. משם ממשיכים ברגל או בתחב\"צ לפונטוורדה",
+    color: "#5a8f4f",
+    stops: [{name:"Redondela", lat:42.2818519, lng:-8.6091703, note:"התחלה"},{name:"Arcade", lat:42.3442161, lng:-8.611849, note:"סיום מסלול החוף"},{name:"Pontevedra", lat:42.4336073, lng:-8.6478173, note:"לינה (הליכה או תחב\"צ)"}]
+  },
+  {
+    n: 5, title: "לפדרון", date: "11/9 - יום שישי",
+    notes: "תחב\"צ ל-Caldas de Reis ומשם הליכה של 18 ק\"מ לפדרון. לינה בפדרון",
+    color: "#3f7f6e",
+    stops: [{name:"Caldas de Reis", lat:42.6041774, lng:-8.642126, note:"נקודת יציאה (הגעה בתחב\"צ)"},{name:"Padrón", lat:42.7366435, lng:-8.6602439, note:"לינה"}]
+  },
+  {
+    n: 6, title: "לטאו", date: "12/9 - יום שבת",
+    notes: "הליכה של 12 ק\"מ. לינה בטאו",
+    color: "#3d6ea5",
+    stops: [{name:"Padrón", lat:42.7366435, lng:-8.6602439, note:"התחלה"},{name:"Teo", lat:42.8060726, lng:-8.5611142, note:"לינה"}]
+  },
+  {
+    n: 7, title: "סנטיאגו דה קומפוסטלה!", date: "13/9 - יום ראשון",
+    notes: "הליכה של 13 ק\"מ - הגעה לסנטיאגו. לינה שם",
+    color: "#6a4c93",
+    stops: [{name:"Teo", lat:42.8060726, lng:-8.5611142, note:"התחלה"},{name:"Santiago de Compostela", lat:42.880688, lng:-8.5443954, note:"סיום הקמינו! 🎉"}]
+  },
+  {
+    n: 8, title: "חזרה לפורטו וטיסה הביתה", date: "14/9 - יום שני",
+    notes: "נסיעה מסנטיאגו חזרה לפורטו (אוטובוס/רכבת), משם הטיסה הביתה",
+    color: "#8a8378",
+    stops: [{name:"Santiago de Compostela", lat:42.880688, lng:-8.5443954, note:"התחלה"},{name:"Porto Airport (OPO)", lat:41.2481, lng:-8.6814, note:"טיסה הביתה"}]
+  }
+];
+
+const map = L.map('map', { zoomControl: true }).setView([42.55, -8.6], 8.3);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; OpenStreetMap contributors',
+  maxZoom: 18
+}).addTo(map);
+
+let dayLayers = []; // { layerGroup, bounds }
+let allBoundsPoints = [];
+
+days.forEach(day => {
+  const group = L.layerGroup();
+  const latlngs = day.stops.map(s => [s.lat, s.lng]);
+  latlngs.forEach(p => allBoundsPoints.push(p));
+
+  // route line
+  if (latlngs.length > 1) {
+    L.polyline(latlngs, { color: day.color, weight: 4, opacity: 0.85, dashArray: day.n <= 2 ? '2,8' : null }).addTo(group);
+  }
+
+  // markers
+  day.stops.forEach((s, idx) => {
+    const marker = L.circleMarker([s.lat, s.lng], {
+      radius: 8,
+      fillColor: day.color,
+      color: '#fff',
+      weight: 2,
+      fillOpacity: 1
+    }).addTo(group);
+    marker.bindPopup(`<b>יום ${day.n}: ${day.title}</b><br>${s.name}<br><span style="color:#6b6358">${s.note}</span>`);
+  });
+
+  group.addTo(map);
+  dayLayers.push({ day, group });
+});
+
+function fitAll() {
+  if (allBoundsPoints.length) map.fitBounds(allBoundsPoints, { padding: [40, 40] });
+}
+fitAll();
+
+// Sidebar day list
+const dayListEl = document.getElementById('dayList');
+let selectedDay = null;
+
+days.forEach(day => {
+  const card = document.createElement('div');
+  card.className = 'day-card';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;">
+      <span class="day-num" style="background:${day.color}">${day.n}</span>
+      <span class="day-title">${day.title}</span>
+    </div>
+    <div class="day-date">${day.date}</div>
+    <div class="day-notes">${day.notes}</div>
+  `;
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.day-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedDay = day;
+    const entry = dayLayers.find(d => d.day.n === day.n);
+    const pts = day.stops.map(s => [s.lat, s.lng]);
+    map.fitBounds(pts, { padding: [80, 80], maxZoom: 14 });
+    document.getElementById('btnAll').classList.remove('active');
+  });
+  dayListEl.appendChild(card);
+});
+
+document.getElementById('btnAll').addEventListener('click', () => {
+  document.querySelectorAll('.day-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('btnAll').classList.add('active');
+  fitAll();
+});
+document.getElementById('btnFit').addEventListener('click', fitAll);
+</script>
+</body>
+</html>
