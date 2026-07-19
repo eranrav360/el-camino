@@ -116,52 +116,55 @@
 <script>
 const days = [
   {
-    n: 1, title: "נחיתה בפורטו", date: "9/7 - יום שני",
-    notes: "לילה בפורטו - HF Tuela",
+    n: 1, title: "טיסה TLV → פורטו", date: "7/9 - יום שני",
+    notes: "✈ LY0373 · המראה 15:05 (טרמינל 3) · נחיתה 19:05 · הזמנה HZIKLB / 75FP9V<br>🏨 לינה: HF Tuela Porto — Rua Arquitecto Marques Da Silva 200, 4150-483 Porto · +351 22 619 4105",
     color: "#c1502e",
-    stops: [{name:"Porto (HF Tuela)", lat:41.1545741, lng:-8.6305493, note:"מקום הלינה"}]
+    stops: [{name:"HF Tuela Porto", lat:41.1545741, lng:-8.6305493, note:"מקום הלינה · +351 22 619 4105"}]
   },
   {
-    n: 2, title: "נסיעה ברכבת לוויגו", date: "8/9 - יום שלישי",
-    notes: "רכבת ALSA/רנפה כ-3 שעות מפורטו. לילה בוויגו",
+    n: 2, title: "אוטובוס פורטו → ויגו", date: "8/9 - יום שלישי",
+    notes: "🚌 ALSA · יציאה 14:30 מ-Casa da Música · הגעה 17:50 לתחנה המרכזית בויגו · ללא הזמנת מקום, €11 לאדם · אסמכתא 1g4ia7p<br>🏨 לינה: NH Collection Vigo — Avenida García Barbón 17-19, 36201 Vigo · +34 986 43 36 43",
     color: "#d9822b",
-    stops: [{name:"Porto (HF Tuela)", lat:41.1545741, lng:-8.6305493, note:"התחלה - יציאה ברכבת"},{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"נקודת יציאה - מסלול החוף"}]
+    stops: [
+      {name:"Casa da Música (יציאה)", lat:41.1611017, lng:-8.6296999, note:"תחנת אוטובוס ALSA · יציאה 14:30"},
+      {name:"NH Collection Vigo", lat:42.23728, lng:-8.71842, note:"מקום הלינה · +34 986 43 36 43"}
+    ]
   },
   {
     n: 3, title: "תחילת הקמינו - מסלול החוף", date: "9/9 - יום רביעי",
-    notes: "הליכה של כ-15 ק\"מ לרדונדלה. לילה שם",
+    notes: "🥾 הליכה מוויגו לרדונדלה (כ-15 ק\"מ)<br>🏨 לינה: Rubín 21 — Rúa Xeneral Rubín 21, 36800 Redondela · +34 663 69 68 47",
     color: "#c9a227",
-    stops: [{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"התחלה"},{name:"Redondela", lat:42.2818519, lng:-8.6091703, note:"לינה"}]
+    stops: [{name:"Vigo", lat:42.2340821, lng:-8.7137709, note:"התחלה"},{name:"Rubín 21, Redondela", lat:42.2863192, lng:-8.6094215, note:"מקום הלינה · +34 663 69 68 47"}]
   },
   {
-    n: 4, title: "לארקדה - סיום מסלול החוף", date: "10/9 - יום חמישי",
-    notes: "הליכה לארקדה. משם ממשיכים ברגל או בתחב\"צ לפונטוורדה",
+    n: 4, title: "רדונדלה → פונטוורדה", date: "10/9 - יום חמישי",
+    notes: "🥾 הליכה מרדונדלה לפונטוורדה (דרך ארקדה)<br>🏨 לינה: La Fonda — Rúa Isabel II 6, 36002 Pontevedra · +34 645 18 20 92",
     color: "#5a8f4f",
-    stops: [{name:"Redondela", lat:42.2818519, lng:-8.6091703, note:"התחלה"},{name:"Arcade", lat:42.3442161, lng:-8.611849, note:"סיום מסלול החוף"},{name:"Pontevedra", lat:42.4336073, lng:-8.6478173, note:"לינה (הליכה או תחב\"צ)"}]
+    stops: [{name:"Redondela", lat:42.2863192, lng:-8.6094215, note:"התחלה"},{name:"La Fonda, Pontevedra", lat:42.43351, lng:-8.6454936, note:"מקום הלינה · +34 645 18 20 92"}]
   },
   {
-    n: 5, title: "לפדרון", date: "11/9 - יום שישי",
-    notes: "תחב\"צ ל-Caldas de Reis ומשם הליכה של 18 ק\"מ לפדרון. לינה בפדרון",
+    n: 5, title: "פונטוורדה → פדרון", date: "11/9 - יום שישי",
+    notes: "🥾 הליכה מפונטוורדה לפדרון<br>🏨 לינה: Luxury Singular Apartments Padrón — Costa Rincón 1, 15900 Padrón · +34 682 43 38 07",
     color: "#3f7f6e",
-    stops: [{name:"Caldas de Reis", lat:42.6041774, lng:-8.642126, note:"נקודת יציאה (הגעה בתחב\"צ)"},{name:"Padrón", lat:42.7366435, lng:-8.6602439, note:"לינה"}]
+    stops: [{name:"Pontevedra", lat:42.43351, lng:-8.6454936, note:"התחלה"},{name:"Luxury Singular Apartments, Padrón", lat:42.7383808, lng:-8.6630817, note:"מקום הלינה · +34 682 43 38 07"}]
   },
   {
-    n: 6, title: "לטאו", date: "12/9 - יום שבת",
-    notes: "הליכה של 12 ק\"מ. לינה בטאו",
+    n: 6, title: "פדרון → (לילה טרם הוזמן)", date: "12/9 - יום שבת",
+    notes: "🥾 הליכה מפדרון לכיוון סנטיאגו<br>⚠️ הלילה הזה עדיין לא הוזמן! לפי התכנון המקורי - אזור טאו (Teo), כ-12 ק\"מ מפדרון",
     color: "#3d6ea5",
-    stops: [{name:"Padrón", lat:42.7366435, lng:-8.6602439, note:"התחלה"},{name:"Teo", lat:42.8060726, lng:-8.5611142, note:"לינה"}]
+    stops: [{name:"Padrón", lat:42.7383808, lng:-8.6630817, note:"התחלה"},{name:"Teo (הצעה - טרם הוזמן)", lat:42.8060726, lng:-8.5611142, note:"⚠️ לינה לא מוזמנת עדיין"}]
   },
   {
     n: 7, title: "סנטיאגו דה קומפוסטלה!", date: "13/9 - יום ראשון",
-    notes: "הליכה של 13 ק\"מ - הגעה לסנטיאגו. לינה שם",
+    notes: "🥾 הליכה לסנטיאגו - סיום הקמינו! 🎉<br>🏨 לינה: Hotel San Miguel — Praza de San Miguel dos Agros 9, 15704 Santiago · +34 981 55 57 79",
     color: "#6a4c93",
-    stops: [{name:"Teo", lat:42.8060726, lng:-8.5611142, note:"התחלה"},{name:"Santiago de Compostela", lat:42.880688, lng:-8.5443954, note:"סיום הקמינו! 🎉"}]
+    stops: [{name:"Teo", lat:42.8060726, lng:-8.5611142, note:"התחלה"},{name:"Hotel San Miguel, Santiago", lat:42.8821488, lng:-8.5429669, note:"מקום הלינה · +34 981 55 57 79"}]
   },
   {
-    n: 8, title: "חזרה לפורטו וטיסה הביתה", date: "14/9 - יום שני",
-    notes: "נסיעה מסנטיאגו חזרה לפורטו (אוטובוס/רכבת), משם הטיסה הביתה",
+    n: 8, title: "אוטובוס לפורטו + טיסה הביתה", date: "14/9 - יום שני",
+    notes: "🚌 ALSA (bus 3491) · יציאה 12:30 מסנטיאגו · הגעה 14:50 לשדה התעופה פורטו · מקומות 7 (Eran) ו-8 (Yuval), €36 לאדם · אסמכתא 1g8g1th<br>✈ LY0374 פורטו → TLV · המראה 20:25 · נחיתה 03:45 (15/9)",
     color: "#8a8378",
-    stops: [{name:"Santiago de Compostela", lat:42.880688, lng:-8.5443954, note:"התחלה"},{name:"Porto Airport (OPO)", lat:41.2481, lng:-8.6814, note:"טיסה הביתה"}]
+    stops: [{name:"Hotel San Miguel, Santiago", lat:42.8821488, lng:-8.5429669, note:"התחלה"},{name:"Porto Airport (OPO)", lat:41.2481, lng:-8.6814, note:"טיסה הביתה LY0374 · 20:25"}]
   }
 ];
 
